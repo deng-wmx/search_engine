@@ -60,6 +60,6 @@ Configuration::~Configuration() {
 
 }
 
-const unordered_map<string, string>& Configuration::getMap() const {
+unordered_map<string, string>& Configuration::getMap() {
     return _map;
 }

@@ -16,7 +16,7 @@ public:
     // 什么也不用干
     ~Configuration();
 
-    const unordered_map<string, string>& getMap() const;
+    unordered_map<string, string>& getMap();
 
 private:
     // 用于存放读取配置文件的key和value

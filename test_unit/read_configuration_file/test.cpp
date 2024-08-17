@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
                 break;
             }
             else {
-                cout << word << endl;
+                cout << word << "1111" << endl;
             }
         }
     }
