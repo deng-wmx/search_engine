@@ -42,6 +42,8 @@ public:
 
     // 存储词典到到相应的目录文件
     void storeDict();
+private:
+    string readFileToString(string fileName);
 
 private:
     // 这个先不要，可以通过Configuration类的数据成员来获得
