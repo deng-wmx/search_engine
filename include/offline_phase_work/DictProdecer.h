@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 #include <set>
+#include <unordered_set>
 #include "../../include/log4cpp/Mylogger.h"
 
 using std::vector;
@@ -12,6 +13,7 @@ using std::unordered_map;
 using std::string;
 using std::pair;
 using std::set;
+using std::unordered_set;
 
 // 用于读配置文件的类
 class Configuration;
@@ -42,6 +44,15 @@ public:
 
     // 存储词典到到相应的目录文件
     void storeDict();
+
+    // 构建停用词数据结构
+    void buildStop(Configuration *configuration);
+
+    // 构建中文停用词数据结构
+    void buildCnStop(const string &path);
+    
+    // 构建英文文停用词数据结构
+    void buildEnStop(const string &path);
 private:
     string readFileToString(string fileName);
 
@@ -55,6 +66,12 @@ private:
 
     // 存放字符的索引(这里的string不是字符串的含义，表示一个英文或者一个中文字符)
     unordered_map <string, set<int>> _index;
+
+    // 英文停用词
+    unordered_set<string> _enStop;
+    
+    // 中文停用词
+    unordered_set<string> _cnStop;
 
     // 用于中文分词的对象，因为加载一次太慢，所以该对象自始自终就创建一个
     SplitTool *_cuttor;
