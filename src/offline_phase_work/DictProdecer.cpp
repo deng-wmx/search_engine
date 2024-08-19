@@ -73,7 +73,7 @@ void DictProdecer::buildCnDict(const string &path) {
         if (filePath[filePath.size() - 1] != '.') {
             // 把文件内容读到string中
             string content = readFileToString(path + "/" + string(pdirent->d_name));
-            
+
             // 把中文中的\r\n去掉，用前一个字母进行替换
             // 预处理，为了保证下面的for循环从1开始，防止数组越界访问
             if (content[0] == '\r' || content[0] == '\n') {
@@ -129,7 +129,7 @@ void DictProdecer::buildEnDict(const string &path) {
         if (filePath[filePath.size() - 1] != '.') {
             // 把文件内容读到string中
             string content = readFileToString(path + "/" + string(pdirent->d_name));
-            
+
             // 处理这个string中的内容，清洗，大写变小写，不要的标点符号变成空格
             for (auto & val :content) {
                 if (std::isalpha(val)) {
@@ -153,7 +153,7 @@ void DictProdecer::buildEnDict(const string &path) {
                     tempMap[word]++;
                 }
             }
-            
+
 
             // 因为写入的是同一个文件，所以文件流可以写到最前面，避免频繁打开关闭文件流
             /* // 输出文件流写入到磁盘 */
@@ -197,16 +197,53 @@ void DictProdecer::buildDict(Configuration *configuration) {
     }
 
 }
+// 通过字符的首个字符得到该字符的整个字节数
+size_t DictProdecer::nBytescode(const unsigned char ch) {
+
+    if((ch & 0x80) == 0) {
+        return 1;  // ASCII 字符
+    } else if((ch & 0xE0) == 0xC0) {
+        return 2;  // 2 字节字符
+    } else if((ch & 0xF0) == 0xE0) {
+        return 3;  // 3 字节字符
+    } else if((ch & 0xF8) == 0xF0) {
+        return 4;  // 4 字节字符
+    } else {
+        return 0;  // 无效的 UTF-8 字符
+    }
+} 
 
 // 创建索引文件
 void DictProdecer::creatIndex() {
-
+    // 读字典容器 
+    for (int i = 0; i < _dict.size(); ++i) {
+        // 依次遍历该词的字符，建立对应的索引
+        for (size_t j = 0; j < _dict[i].first.size();) {
+            size_t len = nBytescode(static_cast<unsigned char>(_dict[i].first[j]));
+            if (len == 0) {
+                break;
+            }
+            // 把词典中对应的词的下表插入_index的set中
+            _index[_dict[i].first.substr(j, len)].insert(i);
+            j += len;
+        }
+    }
+    ofstream ofs("../../data/dictIndex.dat");
+    if (!ofs) {
+        LogError("open file false");
+        exit(-1);
+    }
+    for (auto & val : _index) {
+        ofs << val.first << " ";
+        for (auto & i : val.second) {
+            ofs << i << " ";
+        }
+        ofs << "\n";
+    }
+    // 关闭文件输出流
+    ofs.close();
 }
 
-// 存储词典到到相应的目录文件
-void DictProdecer::storeDict() {
-
-}
 // 构建停用词数据结构
 void DictProdecer::buildStop(Configuration *configuration) {
 
@@ -259,7 +296,7 @@ void DictProdecer::buildCnStop(const string &path) {
     }
     closedir(stream);
 }
-  
+
 // 构建英文文停用词数据结构（这个代码是从构建因为词典粘过来的，注释可能不对）
 void DictProdecer::buildEnStop(const string &path) {
     // 读停用词文件到string中

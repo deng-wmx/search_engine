@@ -28,6 +28,9 @@ int main(int argc, char* argv[]) {
     // 用停用词过滤，并创建词典
     dict.buildDict(&configuration);
 
+    // 创建索引数据结构和文件
+    dict.creatIndex();
+
     return 0;
 }
 

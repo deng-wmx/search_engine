@@ -42,8 +42,9 @@ public:
     // 创建索引文件
     void creatIndex();
 
+    // 不用要的
     // 存储词典到到相应的目录文件
-    void storeDict();
+    /* void storeDict(); */
 
     // 构建停用词数据结构
     void buildStop(Configuration *configuration);
@@ -54,7 +55,11 @@ public:
     // 构建英文文停用词数据结构
     void buildEnStop(const string &path);
 private:
+    // 读整个文件内容到string中
     string readFileToString(string fileName);
+
+    // 通过字符的首个字符得到该字符的整个字节数
+    size_t nBytescode(const unsigned char ch);
 
 private:
     // 这个先不要，可以通过Configuration类的数据成员来获得
