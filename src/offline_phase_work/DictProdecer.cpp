@@ -1,5 +1,6 @@
 #include "../../include/offline_phase_work/DictProdecer.h"
 #include "../../include/offline_phase_work/Configuration.h"
+#include "../../include/offline_phase_work/SplitTool.h"
 #include <dirent.h>
 #include <fstream>
 #include <unistd.h>
@@ -49,7 +50,50 @@ string DictProdecer::readFileToString(string fileName) {
 }
 // 创建中文词典，参数为一个中文语料目录
 void DictProdecer::buildCnDict(const string &path) {
-    LogInfo(path.c_str());
+
+    // 输出文件流写入到磁盘
+    ofstream ofs;
+    ofs.open("../../data/dict.dat", std::ios::app);
+    if (!ofs) {
+        LogError("open file false");
+        exit(-1);
+    }
+
+    //LogInfo(path.c_str());
+    // 用目录流依次遍历目录中的目录项
+    DIR *stream = opendir(path.c_str());
+    if (!stream) {
+        LogError("opendir false");
+        exit(-1);
+    }
+    struct dirent *pdirent;
+    while ((pdirent = readdir(stream)) != NULL) {
+        string filePath = string(pdirent->d_name);
+        // 打开这些中文语料文件，进行处理
+        if (filePath[filePath.size() - 1] != '.') {
+            // 把文件内容读到string中
+            string content = readFileToString(path + "/" + string(pdirent->d_name));
+            
+            // 把中文中的\r\n去掉，用前一个字母进行替换
+            // 预处理，为了保证下面的for循环从1开始，防止数组越界访问
+            if (content[0] == '\r' || content[0] == '\n') {
+                content[0] = ' ';
+            }
+            for (int i = 1; i < content.size(); ++i) {
+                if (content[i] == '\r' || content[i] == '\n') {
+                    content[i] = content[i - 1];
+                }
+            }
+            cout << content;
+            // 中文分词
+            /* vector<string> temp = _cuttor->cut(content); */
+            /* for (auto & val : temp) { */
+            /*     cout << val << " " << "\n"; */
+            /* } */
+        }
+    }
+    closedir(stream);
+    ofs.close();
 }
 
 // 创建英文词典，参数为一个中文语料目录
@@ -152,3 +196,78 @@ void DictProdecer::creatIndex() {
 void DictProdecer::storeDict() {
 
 }
+// 构建停用词数据结构
+void DictProdecer::buildStop(Configuration *configuration) {
+
+    // 先获取配置文件对应的map
+    unordered_map<string, string> &myMap = configuration->getMap();
+    // 构造中文停用词
+    if (myMap.find(string("chinese_stop_words")) != myMap.end()) {
+        buildCnStop(myMap[string("chinese_stop_words")]);
+    }
+    else {
+        LogError("chinese_stop_words = nullptr");
+    }
+
+    // 构造英文停用词
+    if (myMap.find(string("english_stop_words")) != myMap.end()) {
+        buildEnStop(myMap[string("english_stop_words")]);
+    }
+    else {
+        LogError("english_stop_words = nullptr");
+    }
+}
+
+// 构建中文停用词数据结构（这个代码是从构建因为词典粘过来的，注释可能不对）
+void DictProdecer::buildCnStop(const string &path) {
+    // 读停用词文件到string中
+    DIR *stream = opendir(path.c_str());
+    if (!stream) {
+        LogError("opendir false");
+        exit(-1);
+    }
+    struct dirent *pdirent;
+    while ((pdirent = readdir(stream)) != NULL) {
+        string filePath = string(pdirent->d_name);
+        if (filePath[filePath.size() - 1] != '.') {
+            ifstream ifs(path + "/" + filePath);
+            if (!ifs) {
+                LogError("open file false");
+            }
+            // 停用词文件每行一个词
+            string line;
+            while (getline(ifs, line)) {
+                _cnStop.insert(line);
+            }
+        }
+    }
+    cout << *_cnStop.begin() << "\n";
+    closedir(stream);
+}
+  
+// 构建英文文停用词数据结构（这个代码是从构建因为词典粘过来的，注释可能不对）
+void DictProdecer::buildEnStop(const string &path) {
+    // 读停用词文件到string中
+    DIR *stream = opendir(path.c_str());
+    if (!stream) {
+        LogError("opendir false");
+        exit(-1);
+    }
+    struct dirent *pdirent;
+    while ((pdirent = readdir(stream)) != NULL) {
+        string filePath = string(pdirent->d_name);
+        if (filePath[filePath.size() - 1] != '.') {
+            ifstream ifs(path + "/" + filePath);
+            if (!ifs) {
+                LogError("open file false");
+            }
+            // 停用词文件每行一个词
+            string line;
+            while (getline(ifs, line)) {
+                _enStop.insert(line);
+            }
+        }
+    }
+    cout << *_cnStop.begin() << "\n";
+    closedir(stream);
+} 
