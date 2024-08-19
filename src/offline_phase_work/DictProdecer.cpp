@@ -84,12 +84,20 @@ void DictProdecer::buildCnDict(const string &path) {
                     content[i] = content[i - 1];
                 }
             }
-            cout << content;
             // 中文分词
-            /* vector<string> temp = _cuttor->cut(content); */
-            /* for (auto & val : temp) { */
-            /*     cout << val << " " << "\n"; */
-            /* } */
+            vector<string> temp = _cuttor->cut(content);
+            unordered_map<string, int> temp1;
+            for (auto & val : temp) {
+                // 过滤
+                if (_cnStop.find(val) == _cnStop.end()) {
+                    temp1[val]++;
+                }
+            }
+            for (auto & val : temp1) {
+                // 写入到数据成员_dict，用于索引的构建
+                _dict.push_back({val.first, val.second});
+                ofs << val.first << " " << val.second << "\n";
+            }
         }
     }
     closedir(stream);
@@ -140,7 +148,10 @@ void DictProdecer::buildEnDict(const string &path) {
             // 这里先用map进行构造，然后再拷贝到vector中
             unordered_map<string, int> tempMap;
             while (iss >> word) {
-                tempMap[word]++;
+                // 需要过滤
+                if (_enStop.find(word) == _enStop.end()) {
+                    tempMap[word]++;
+                }
             }
             
 
@@ -230,18 +241,22 @@ void DictProdecer::buildCnStop(const string &path) {
     while ((pdirent = readdir(stream)) != NULL) {
         string filePath = string(pdirent->d_name);
         if (filePath[filePath.size() - 1] != '.') {
-            ifstream ifs(path + "/" + filePath);
-            if (!ifs) {
-                LogError("open file false");
+            string content = readFileToString(path + "/" + filePath);
+            for (auto & val : content) {
+                if (val == '\r' || val == '\n') {
+                    val = ' ';
+                }
             }
-            // 停用词文件每行一个词
-            string line;
-            while (getline(ifs, line)) {
-                _cnStop.insert(line);
+            istringstream iss(content);
+            if (!iss) {
+                LogError("bind istringstream false");
+            }
+            string word;
+            while (iss >> word) {
+                _cnStop.insert(word);
             }
         }
     }
-    cout << *_cnStop.begin() << "\n";
     closedir(stream);
 }
   
@@ -257,17 +272,34 @@ void DictProdecer::buildEnStop(const string &path) {
     while ((pdirent = readdir(stream)) != NULL) {
         string filePath = string(pdirent->d_name);
         if (filePath[filePath.size() - 1] != '.') {
-            ifstream ifs(path + "/" + filePath);
-            if (!ifs) {
-                LogError("open file false");
+            string content = readFileToString(path + "/" + filePath);
+            for (auto & val : content) {
+                if (val == '\r' || val == '\n') {
+                    val = ' ';
+                }
             }
-            // 停用词文件每行一个词
-            string line;
-            while (getline(ifs, line)) {
-                _enStop.insert(line);
+            istringstream iss(content);
+            if (!iss) {
+                LogError("bind istringstream false");
             }
+            string word;
+            while (iss >> word) {
+                _enStop.insert(word);
+            }
+            // /r/n的血泪史
+            /* ifstream ifs(path + "/" + filePath); */
+            /* if (!ifs) { */
+            /*     LogError("open file false"); */
+            /* } */
+
+            /* // 停用词文件每行一个词 */
+            /* string line; */
+            /* while (getline(ifs, line)) { */
+            /*     int index = line.find('\r'); */
+            /*     _enStop.insert(line); */
+            /* } */
+            /* ifs.close(); */
         }
     }
-    cout << *_cnStop.begin() << "\n";
     closedir(stream);
 } 

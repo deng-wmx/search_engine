@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
     // 先创建停用词数据结构，这里用的是unorder_set
     dict.buildStop(&configuration);
     // 用停用词过滤，并创建词典
-    /* dict.buildDict(&configuration); */
+    dict.buildDict(&configuration);
 
     return 0;
 }
