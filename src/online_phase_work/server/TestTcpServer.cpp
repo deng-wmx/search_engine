@@ -3,6 +3,7 @@
 #include "../../../include/online_phase_work/server/ThreadPool.h"
 #include "../../../include/online_phase_work/server/Preparation.h"
 #include "../../../include/log4cpp/Mylogger.h"
+#include "../../../include/online_phase_work/server/EditDistence.h"
 #include <iostream>
 #include <unistd.h>
 #include <sstream>
@@ -98,18 +99,19 @@ void server()
     server.start();
 }
 void ready() {
-
-}
-
-int main(int argc, char **argv)
-{
-    // 预热，把词典文件和索引文件读入内存中
     Preparation preparation;
     preparation.bulidDict();
     dict = preparation.getDict();
     preparation.buildIndex();
     myIndex = preparation.getIndex();
-    cout << myIndex.size() << "\n";
+}
+
+int main(int argc, char **argv)
+{
+    // 预热，把词典文件和索引文件读入内存中
+    ready();
+    EditDistence editDistence;
+    cout << editDistence.editDistance("111", "111") << "\n";
 
     /* server(); */
 
