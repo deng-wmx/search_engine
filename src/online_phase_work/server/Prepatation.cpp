@@ -51,6 +51,7 @@ void Preparation::buildIndex() {
     if (!ifs) {
         LogError("open files false");
     }
+    int i = 0;
     // 每行都是1个键，加一串int的set
     string line;
     while (getline(ifs, line)) {
@@ -66,6 +67,7 @@ void Preparation::buildIndex() {
            if (flag) {
                flag = false;
                temp = word;
+               ++i;
            }// 这里肯定是第二个词,把第二个词插入对应的set中
            else {
                _index[temp].insert(std::stoi(word));

@@ -74,14 +74,19 @@ void DictProdecer::buildCnDict(const string &path) {
             // 把文件内容读到string中
             string content = readFileToString(path + "/" + string(pdirent->d_name));
 
-            // 把中文中的\r\n去掉，用前一个字母进行替换
-            // 预处理，为了保证下面的for循环从1开始，防止数组越界访问
-            if (content[0] == '\r' || content[0] == '\n') {
-                content[0] = ' ';
-            }
-            for (int i = 1; i < content.size(); ++i) {
+            /* // 把中文中的\r\n去掉，用前一个字母进行替换 */
+            /* // 预处理，为了保证下面的for循环从1开始，防止数组越界访问 */
+            /* if (content[0] == '\r' || content[0] == '\n') { */
+            /*     content[0] = ' '; */
+            /* } */
+            /* for (int i = 1; i < content.size(); ++i) { */
+            /*     if (content[i] == '\r' || content[i] == '\n') { */
+            /*         content[i] = content[i - 1]; */
+            /*     } */
+            /* } */
+            for (int i = 0; i < content.size(); ++i) {
                 if (content[i] == '\r' || content[i] == '\n') {
-                    content[i] = content[i - 1];
+                    content[i] = ' ';
                 }
             }
             // 中文分词
