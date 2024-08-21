@@ -6,6 +6,22 @@
 #include "../../../include/online_phase_work/server/Preparation.h"
 #include "../../../include/log4cpp/Mylogger.h"
 #include "../../../include/online_phase_work/server/EditDistence.h"
+#include <queue>
+
+using std::priority_queue;
+
+// 使用自定义仿函数进行排序
+using PairType = pair<string, pair<int, int>>;
+
+struct Compare {
+    bool operator()(const PairType &p1, const PairType &p2) {
+        if (p1.second.second != p2.second.second) {
+            return p1.second.second > p2.second.second; // 让 first 降序
+        }
+        return p1.second.first < p2.second.first; // 让 second 升序
+    }
+};
+
 
 class MyTask
 {
@@ -35,7 +51,7 @@ private:
     unordered_map<string, set<int>> _index;// 索引
 
     // 第一个为候选词，第二个为词频，第三个为编辑距离
-    vector<pair<string, pair<int, int>>> _wordFrequeAndEditDistan;
+    priority_queue<PairType, vector<PairType>, Compare> _wordFrequeAndEditDistan;
 
     // 计算最小编辑距离
     EditDistence *_editDistance;

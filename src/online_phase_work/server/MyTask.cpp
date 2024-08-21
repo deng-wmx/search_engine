@@ -58,10 +58,10 @@ string MyTask::recommend(const string &content) {
         i += len;
     }
 
-    // 这里词频和最小距离数据结构已经填写好了
-    for (int i = 0; i < _wordFrequeAndEditDistan.size(); ++i) {
-        cout << _wordFrequeAndEditDistan[i].first << " " << _wordFrequeAndEditDistan[i].second.first <<
-            " " << _wordFrequeAndEditDistan[i].second.second << "\n";
+    while(!_wordFrequeAndEditDistan.empty()) {
+        auto val = _wordFrequeAndEditDistan.top();
+        cout << val.first << " " << val.second.first << " " << val.second.second << "\n";
+        _wordFrequeAndEditDistan.pop();
     }
     return "";
 }
@@ -76,7 +76,7 @@ void MyTask::recallWord(const string &myChar, const string &word) {
             string candidateWords = _dict[val].first;
             int frequency = _dict[val].second;
             int editDistance = _editDistance->editDistance(word, candidateWords);
-            _wordFrequeAndEditDistan.push_back({candidateWords, {frequency, editDistance}});
+            _wordFrequeAndEditDistan.push({candidateWords, {frequency, editDistance}});
         }
     }
 }
