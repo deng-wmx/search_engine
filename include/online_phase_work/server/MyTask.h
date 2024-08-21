@@ -6,9 +6,11 @@
 #include "../../../include/online_phase_work/server/Preparation.h"
 #include "../../../include/log4cpp/Mylogger.h"
 #include "../../../include/online_phase_work/server/EditDistence.h"
+#include "../../../include/online_phase_work/nlohmann/json.hpp"
 #include <queue>
 
 using std::priority_queue;
+using json = nlohmann::json;
 
 // 使用自定义仿函数进行排序
 using PairType = pair<string, pair<int, int>>;
@@ -40,6 +42,9 @@ private:
 
     // 召回，并填充词频和最小编辑距离
     void recallWord(const string &myChar, const string &word);
+
+    // 构造排序的前十个(如果有十个)不重复的候选词的json给客服端
+    string buildJson();
 private:
     string _msg;// 这里其实就是整个小火车的内容
     string _len;

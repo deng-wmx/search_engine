@@ -2,6 +2,7 @@
 #include "../../../include/online_phase_work/server/EventLoop.h"
 #include <iostream>
 #include <sstream>
+#include <string.h>
 
 using std::cout;
 using std::endl;
@@ -24,6 +25,10 @@ TcpConnection::~TcpConnection()
 
 void TcpConnection::send(const string &msg)
 {
+    int len = msg.size();
+    char buff[4] = { 0 };
+    memcpy(buff, &len, sizeof(int));
+    _sockIO.writen(buff, sizeof(int));
     _sockIO.writen(msg.c_str(), msg.size());
 }
 

@@ -23,6 +23,8 @@ void MyTask::process()
     if (_flag == string("0")) {
         // 执行推荐的逻辑
         string result = recommend(_content);
+        // 先发长度，再发内容
+        _con->sendInLoop(result);
     }
     else if (_flag == string("1")) {
         // 执行搜索的逻辑，暂定
@@ -57,13 +59,15 @@ string MyTask::recommend(const string &content) {
         recallWord(myChar, content);
         i += len;
     }
-
-    while(!_wordFrequeAndEditDistan.empty()) {
-        auto val = _wordFrequeAndEditDistan.top();
-        cout << val.first << " " << val.second.first << " " << val.second.second << "\n";
-        _wordFrequeAndEditDistan.pop();
-    }
-    return "";
+    // 如果有10个候选词，那么构造前10个候选词的json给客服端
+    string messages = buildJson();
+    return messages;
+    // 把前十个发给客服端
+    /* while(!_wordFrequeAndEditDistan.empty()) { */
+        /* auto val = _wordFrequeAndEditDistan.top(); */
+        /* cout << val.first << " " << val.second.first << " " << val.second.second << "\n"; */
+        /* _wordFrequeAndEditDistan.pop(); */
+    /* } */
 }
 
 void MyTask::recallWord(const string &myChar, const string &word) { 
@@ -79,4 +83,20 @@ void MyTask::recallWord(const string &myChar, const string &word) {
             _wordFrequeAndEditDistan.push({candidateWords, {frequency, editDistance}});
         }
     }
+}
+
+string MyTask::buildJson() {
+    set<string> temp;
+    while (!_wordFrequeAndEditDistan.empty()) {
+        // 查找到的候选词如果有10个那么则返回给客服端10个候选词的json
+        if (temp.size() == 10) {
+            break;
+        }
+        // 把候选词插入temp中
+        temp.insert(_wordFrequeAndEditDistan.top().first);
+        _wordFrequeAndEditDistan.pop();
+    }
+    json s = temp;
+    string serializedData = s.dump();
+    return serializedData;
 }

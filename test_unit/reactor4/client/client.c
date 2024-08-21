@@ -1,3 +1,4 @@
+#include "../../../include/online_phase_work/nlohmann/json.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,6 +55,17 @@ ssize_t recvn(int sock_fd, void *buf, size_t len, int flags) {
     return total;
 }
 
+// 格式输出服务段发送过来的json
+void formatOutput(string messages) {
+    // 解析JSON字符串
+    nlohmann::json json_array = nlohmann::json::parse(messages);
+
+    // 输出JSON数组中的元素
+    for (const auto& element : json_array) {
+        std::cout << element.get<std::string>() << std::endl;
+    }
+
+}
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -75,7 +87,7 @@ int main(int argc, char *argv[]) {
         error(1, errno, "connect");
     }
 
-    char buff[4096];
+    char buff[4096] = { 0 };
     fd_set main_fd;
     FD_ZERO(&main_fd);
     FD_SET(STDIN_FILENO, &main_fd);
@@ -117,14 +129,22 @@ int main(int argc, char *argv[]) {
 
         if (FD_ISSET(sock_fd, &read_fd)) {
             memset(buff, 0, sizeof(buff));
-            int bytes = recv(sock_fd, buff, sizeof(buff) - 1, 0); // -1 to ensure null termination
+            int bytes = recvn(sock_fd, buff, sizeof(int), 0); // -1 to ensure null termination
+            
             if (bytes == -1) {
                 error(1, errno, "recv");
             } else if (bytes == 0) {
                 printf("Server disconnected.\n");
                 break;
             } else {
-                printf("Received: %s\n", buff);
+                // 先收消息的长度，再收消息的内容
+                int len;
+                memcpy(&len, buff, sizeof(int));
+
+                memset(buff, 0, sizeof(buff));
+                recvn(sock_fd, buff, len, 0);
+
+                formatOutput(string(buff));
             }
         }
     }
