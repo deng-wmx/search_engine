@@ -100,7 +100,7 @@ void RSS::store(const string &fileName)
             << "</docid>\n\t<title>" << _rss[idx]._title 
             << "</title>\n\t<link>" << _rss[idx]._link 
             << "</description>\n\t<content>" << _rss[idx]._content << "</content>\n</doc>";
-        ofs << "\0" << '\n' ;
+        ofs  << '\n' ;
         ++_n;
         ofs.flush();
         // 写之后把这个网页文件的长度计算出来
