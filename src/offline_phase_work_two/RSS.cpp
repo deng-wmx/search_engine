@@ -93,15 +93,15 @@ void RSS::store(const string &fileName)
     // 循环一次，相当于得到了一篇文章，那么写一次偏移文件
     for(size_t idx = 0; idx != _rss.size(); ++idx)
     {
+        ++_n;
         ofs.flush();
         // 写之前得到这次写入的起始位置
         _start = getFileSize(fileName);
-        ofs << "<doc>\n\t<docid>" << idx + 1
+        ofs << "<doc>\n\t<docid>" << _n
             << "</docid>\n\t<title>" << _rss[idx]._title 
             << "</title>\n\t<link>" << _rss[idx]._link 
             << "</description>\n\t<content>" << _rss[idx]._content << "</content>\n</doc>";
         ofs  << '\n' ;
-        ++_n;
         ofs.flush();
         // 写之后把这个网页文件的长度计算出来
         _len = getFileSize(fileName) - _start;
@@ -137,6 +137,9 @@ void RSS::buildPage(Configuration *configuration, const string &fileName) {
                  // 把清洗的一个文件先读到内存中
             read(path + "/" + filePath);
             store(fileName);
+
+            // 应该把vector清空
+            _rss.resize(0);
         }
     }
     closedir(stream);

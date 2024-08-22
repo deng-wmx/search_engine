@@ -12,8 +12,8 @@ int main() {
     }
 
     // 指定读取的起始位置和长度
-    std::streampos position = 0;  // 从文件的第10个字节开始读取
-    std::size_t length = 1044;       // 读取20个字节
+    std::streampos position = 1041270;  // 从文件的第10个字节开始读取
+    std::size_t length = 2546;       // 读取20个字节
 
     // 移动文件读取指针到指定位置
     file.seekg(position);
