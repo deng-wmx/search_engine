@@ -10,9 +10,11 @@
 #include <error.h>
 #include <iostream>
 #include <string>
+#include "../../../include/online_phase_work/nlohmann/json.hpp"
 
 using std::cout;
 using std::string;
+using json = nlohmann::json;
 typedef struct {
     int len;// 载荷的长度
     int flag; // 区分是推荐还是搜索
@@ -54,6 +56,16 @@ ssize_t recvn(int sock_fd, void *buf, size_t len, int flags) {
     return total;
 }
 
+void jsonParse(string jsonStr) {
+
+    json json_array = nlohmann::json::parse(jsonStr);
+
+    // 输出JSON数组中的元素
+    for (const auto& element : json_array) {
+        std::cout << element.get<std::string>() << std::endl;
+    }
+    cout << "**********************************" << "\n";
+}
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -117,14 +129,19 @@ int main(int argc, char *argv[]) {
 
         if (FD_ISSET(sock_fd, &read_fd)) {
             memset(buff, 0, sizeof(buff));
-            int bytes = recv(sock_fd, buff, sizeof(buff) - 1, 0); // -1 to ensure null termination
+            int bytes = recvn(sock_fd, buff, sizeof(int), 0); // -1 to ensure null termination
             if (bytes == -1) {
                 error(1, errno, "recv");
             } else if (bytes == 0) {
                 printf("Server disconnected.\n");
                 break;
             } else {
-                printf("Received: %s\n", buff);
+                int len;
+                memcpy(&len, buff, sizeof(int));
+                memset(buff, 0, sizeof(buff));
+                recvn(sock_fd, buff, len, 0);
+                jsonParse(string(buff));
+                
             }
         }
     }
