@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sstream>
 #include <dirent.h>
+#include <boost/regex.hpp>
 
 using std::ifstream;
 using std::istringstream;
@@ -66,6 +67,8 @@ void RSS::read(const string &filename)
 
         std::regex reg("<[^>]+>");//通用正则表达式
         content = regex_replace(content, reg, "");
+        std::regex whitespace_reg("\\s+");
+        content = std::regex_replace(content, whitespace_reg, "");
 
         RSSIteam rssItem;
 
@@ -133,8 +136,8 @@ void RSS::buildPage(Configuration *configuration, const string &fileName) {
     while ((pdirent = readdir(stream)) != NULL) {
         string filePath = string(pdirent->d_name);
         if (filePath[filePath.size() - 1] != '.') {
-                 // 清洗当前目录下网页
-                 // 把清洗的一个文件先读到内存中
+            // 清洗当前目录下网页
+            // 把清洗的一个文件先读到内存中
             read(path + "/" + filePath);
             store(fileName);
 
